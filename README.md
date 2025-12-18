@@ -10,11 +10,12 @@ A powerful Laravel package for interacting with the ChatGPT API. This package pr
 - 🔧 Type-safe tool implementation with `IChatTool` interface
 - ⚡ Chainable methods for elegant code
 - 🎯 Automatic tool execution based on ChatGPT's choices
+- 🔄 Automatic retry logic for failed requests
+- 📊 Usage tracking and token monitoring
 
 ## Requirements
-
 - PHP >= 8.1
-- Laravel >= 9.0
+- Laravel >= 9.0 (supports Laravel 9, 10, 11, and 12)
 
 ## Installation
 
@@ -28,6 +29,11 @@ Publish the configuration file:
 
 ```bash
 php artisan vendor:publish --tag=laravel-gpt-config
+```
+
+Add your OpenAI API key to `.env`:
+```env
+OPENAI_API_KEY=your-api-key-here
 ```
 
 ## Quick Start
@@ -56,9 +62,8 @@ $response = ChatGPT::new()
 echo $response->content;
 ```
 
-📖 **For a complete integration guide, see [Integration Guide](docs/integration-guide.md)**
 
-### 2. Create a Tool
+### 3. Create a Tool
 
 Create a tool using the artisan command:
 
@@ -85,7 +90,7 @@ class FindUser extends ChatTool
     /**
      * A description of what the function does.
      */
-    public ?string $description = 'Finds a user by their name or email address';
+    public ?string $description = 'Finds a user by their name';
 
     /**
      * Whether to enable strict schema adherence.
@@ -99,124 +104,40 @@ class FindUser extends ChatTool
             'type' => 'object',
             'properties' => [
                 'name' => ['type' => 'string', 'description' => 'The name of the user to find'],
-                'email' => ['type' => 'string', 'format' => 'email', 'description' => 'The email address of the user to find'],
             ],
-            'required' => [],
+            'required' => ['name'],
         ];
     }
 
     public function invoke(array $args): mixed
     {
-        $user = isset($args['email']) 
-            ? User::where('email', $args['email'])->first()
-            : User::where('name', 'like', "%{$args['name']}%")->first();
-        
-        if (!$user) {
-            return ['success' => false, 'message' => 'User not found'];
-        }
-        
-        return [
-            'success' => true,
-            'user' => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email],
-        ];
+        return User::where('name', 'like', "%{$args['name']}%")->first();
     }
 }
 ```
 
-### 3. Use the Tool with ChatGPT
+### 3. Use the Tool
 
 ```php
 use AllanBernier\LaravelGpt\ChatGPT;
 use App\ChatTools\FindUser;
 
-$response = ChatGPT::new('gpt-3.5-turbo')
+$response = ChatGPT::new()
     ->tool(FindUser::class)
     ->prompt('Could you find the user with email john@example.com?')
     ->send();
 
-if ($response->tool) {
-    // Execute the tool chosen by ChatGPT
-    $result = $response->tool->execute();
-    
-    // Access tool information
-    echo "Tool: {$response->tool->name}\n";
-    echo "Arguments: " . json_encode($response->tool->args) . "\n";
-    echo "Result: " . json_encode($result) . "\n";
-} else {
-    echo $response->content;
-}
+$user = $response->tool->execute();
+echo "Tool: {$response->tool->name}\n"; # find_user
+echo "Arguments: " . json_encode($response->tool->args) . "\n"; # {"email": "john@example.com"}
+
 ```
 
-### Basic Usage (Without Tools)
-
-```php
-use AllanBernier\LaravelGpt\ChatGPT;
-
-$response = ChatGPT::new('gpt-3.5-turbo')
-    ->prompt('Hello, what\'s going on?')
-    ->send();
-
-echo $response->content;
-```
-
-## Documentation
-
-- [Integration Guide](docs/integration-guide.md) - **Guide complet d'intégration dans un projet réel**
-- [Getting Started](docs/getting-started.md) - Installation and configuration
-- [Basic Usage](docs/basic-usage.md) - Simple requests and responses
-- [Tools](docs/tools.md) - Creating and using tools
-- [Advanced Usage](docs/advanced-usage.md) - Advanced features and best practices
-- [API Reference](docs/api-reference.md) - Complete API documentation
-- [Configuration](docs/configuration.md) - Configuration options
-
-## Testing
-
-### Running Tests
-
-Run all tests (unit and integration with mocks):
-```bash
-vendor/bin/phpunit
-```
-
-Run only unit tests:
-```bash
-vendor/bin/phpunit tests/Unit
-```
-
-Run only integration tests (with mocks):
-```bash
-vendor/bin/phpunit tests/Integration
-```
-
-### Real API Tests
-
-The package includes optional tests that make real API calls to OpenAI. These tests are marked with `@group api` and require a valid API key.
-
-**Important:** These tests will make real API calls and may incur costs.
-
-To run real API tests:
-
-1. Set your OpenAI API key:
-```bash
-export OPENAI_API_KEY=your-api-key-here
-```
-
-2. Run the API tests:
-```bash
-vendor/bin/phpunit --group api
-```
-
-Or run a specific API test:
-```bash
-vendor/bin/phpunit --group api tests/Integration/RealApiTest.php
-```
-
-The real API tests will be skipped automatically if `OPENAI_API_KEY` is not set.
 
 ## License
 
-[Specify your license here]
+MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
-[Contributing guidelines if applicable]
+Contributions are welcome! Please feel free to submit a Pull Request.
