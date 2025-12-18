@@ -3,6 +3,18 @@
     "description": "A Laravel package for interacting with the ChatGPT API with built-in support for function calling (tools)",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "laravel",
+        "openai",
+        "chatgpt",
+        "ai",
+        "gpt",
+        "chat",
+        "function-calling",
+        "tools",
+        "assistant",
+        "llm"
+    ],
     "authors": [
         {
             "name": "Allan Bernier"
@@ -35,6 +47,6 @@
             ]
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }
