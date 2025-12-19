@@ -64,13 +64,4 @@ return [
     */
     'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Organization
-    |--------------------------------------------------------------------------
-    |
-    | Optional OpenAI organization ID for usage tracking.
-    |
-    */
-    'organization' => env('OPENAI_ORGANIZATION'),
 ];

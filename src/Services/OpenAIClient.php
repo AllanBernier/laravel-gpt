@@ -14,7 +14,6 @@ class OpenAIClient
     protected int $timeout;
     protected int $maxRetries;
     protected int $retryDelay;
-    protected ?string $organization;
 
     public function __construct(array $config)
     {
@@ -23,7 +22,6 @@ class OpenAIClient
         $this->timeout = $config['timeout'] ?? 30;
         $this->maxRetries = $config['max_retries'] ?? 3;
         $this->retryDelay = $config['retry_delay'] ?? 1;
-        $this->organization = $config['organization'] ?? null;
 
         if (empty($this->apiKey)) {
             throw new AuthenticationException('OpenAI API key is not configured. Please set OPENAI_API_KEY in your .env file.');
@@ -81,10 +79,6 @@ class OpenAIClient
             'Authorization' => "Bearer {$this->apiKey}",
             'Content-Type' => 'application/json',
         ];
-
-        if ($this->organization) {
-            $headers['OpenAI-Organization'] = $this->organization;
-        }
 
         return $headers;
     }

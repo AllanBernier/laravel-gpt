@@ -8,11 +8,12 @@ use AllanBernier\LaravelGpt\Services\OpenAIClient;
 class ChatGPT
 {
     protected string $model;
-    protected ?string $prompt = null;
     protected array $tools = [];
     protected array $toolMapping = []; // Maps tool name to class
     protected array $messages = [];
     protected OpenAIClient $client;
+
+    protected string $maxTokens = 1_000_000;
 
     public function __construct(?string $model = null)
     {
@@ -28,7 +29,21 @@ class ChatGPT
 
     public function prompt(string $prompt): self
     {
-        $this->prompt = $prompt;
+
+        if ($prompt !== null) {
+            $this->messages[] = [
+                'role' => 'user',
+                'content' => $prompt,
+            ];
+        }
+
+
+        return $this;
+    }
+
+    public function maxTokens(int $maxTokens): self
+    {
+        $this->maxTokens = $maxTokens;
         return $this;
     }
 
@@ -77,11 +92,6 @@ class ChatGPT
         return $this;
     }
 
-    public function messages(array $messages): self
-    {
-        $this->messages = $messages;
-        return $this;
-    }
 
     public function send(): Response
     {
@@ -91,11 +101,19 @@ class ChatGPT
         return new Response($apiResponse, $this->toolMapping);
     }
 
+
+    public function model(string $model): self
+    {
+        $this->model = $model;
+        return $this;
+    }
+
     protected function buildPayload(): array
     {
         $payload = [
             'model' => $this->model,
             'messages' => $this->buildMessages(),
+            'max_tokens' => $this->maxTokens,
         ];
 
         // Add tools if any
@@ -173,4 +191,6 @@ class ChatGPT
 
         return false;
     }
+
+    
 }

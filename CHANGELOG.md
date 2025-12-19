@@ -16,7 +16,6 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Support de tous les modèles OpenAI (gpt-3.5-turbo, gpt-4, etc.)
 - Gestion des exceptions spécifiques (AuthenticationException, RateLimitException)
 - Configuration flexible via fichier de configuration Laravel
-- Support des headers personnalisés (Organization)
 - Parsing automatique des réponses avec extraction des informations d'usage
 - Exécution automatique des outils choisis par ChatGPT
 - Documentation complète avec exemples d'intégration
